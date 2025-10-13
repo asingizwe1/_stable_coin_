@@ -26,7 +26,16 @@
 pragma solidity ^0.8.18;
 
 
-
+/*
+ * @title  DecentralizedStableCoin
+ * @author Louis Asingizwe
+ * @Collateral Exogenous
+ * @minting Algorithmic
+ * @Relative Stability Pegged to USD 
+ * 
+ * Thos contract meant to to be governed by DSCEngine. ERC20 with minting burning etc-> the logic is in a seperate contract
+ * 
+ */
 
 contract DecentralizedStableCoin {
  
