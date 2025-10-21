@@ -39,8 +39,63 @@ contract DSCEngine {
  *
  */
 
+/*
+@param amountCollateral
+@param tokenCollateralAddress
+*/
 
-function depositCollateralAndMintDsc() external {
+
+/////ERRORS///////
+/////////////////////
+error DSCENgine_NeedsMorethanZero();
+
+
+
+/////STATE VARIABLES///////
+/////////////////////
+//refer to chainlink price feed
+mapping(address token=>address PriceFeed) private s_priceFeed;//tokenToPriceFeed
+
+
+
+/////MODIFIERS///////
+/////////////////////
+//set a modifier so that users can set 0 collateral transcation
+modifier moreThanZer0(uint256 amount){
+if amount(){revert  DSCENgine_NeedsMorethanZero();}_;
+
+}
+
+//we also want modifier to emphasize specific collateral to be used
+
+//modifier isAllowedToken(address token){}
+
+
+
+
+
+
+
+
+/////FUNCTIONS///////
+/////////////////////
+constructor(address[] memory tokenAddresses,
+    address[] memory priceFeedAddress,
+){
+
+    
+}
+
+
+
+
+
+
+/////EXTERNAL FUNCTIONS///////
+/////////////////////
+
+function depositCollateralAndMintDsc(address tokenCollateralAddress, uint256 amountCollateral) external {
+    //we firstly need users to select where collateral is from
 
 
 
