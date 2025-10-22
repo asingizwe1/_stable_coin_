@@ -24,7 +24,7 @@
 // view & pure functions
 
 pragma solidity ^0.8.18;
-
+import {DecentralizedStableCoin} from "./DecentralizedStableCoin.sol";
 contract DSCEngine {
 /**
  * @title  DSCEngine
@@ -48,7 +48,7 @@ contract DSCEngine {
 /////ERRORS///////
 /////////////////////
 error DSCENgine_NeedsMorethanZero();
-
+error  DSCENgine__TokenAddressesAndPriceFeedAddressesMustBeSameLength();
 
 
 /////STATE VARIABLES///////
@@ -56,7 +56,7 @@ error DSCENgine_NeedsMorethanZero();
 //refer to chainlink price feed
 mapping(address token=>address PriceFeed) private s_priceFeed;//tokenToPriceFeed
 
-
+DecentralizedStableCoin private immutable i_dsc;
 
 /////MODIFIERS///////
 /////////////////////
@@ -81,13 +81,22 @@ if amount(){revert  DSCENgine_NeedsMorethanZero();}_;
 /////////////////////
 constructor(address[] memory tokenAddresses,
     address[] memory priceFeedAddress,
-){
-
+    address dscAddress
+){//usd price feed
+if (tokenAddresses.length != priceFeedAddress.length){
+    revert  DSCENgine__TokenAddressesAndPriceFeedAddressesMustBeSameLength();
     
 }
+//eg ETH/USD, BTC/USD
+for(uint256 i=0;i<tokenAddresses.length;i++){
+    //token i= price feed i
+    //if token doesnt have a price feed it isnt allowed
+    s_priceFeed[tokenAddresses[i]]=priceFeedAddress[i];
 
 
-
+}
+i_dsc=DecentralizedStableCoin(dscAddress);
+}
 
 
 
@@ -132,4 +141,4 @@ function mint() external {
 function getHealthFactor() external view {
 //show healthy people are
 
-}
+}}
