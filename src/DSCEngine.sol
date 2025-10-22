@@ -25,6 +25,7 @@
 
 pragma solidity ^0.8.18;
 import {DecentralizedStableCoin} from "./DecentralizedStableCoin.sol";
+import {ReentrancyGuard} from "@openzeppelin/contracts/security/ReentrancyGuard.sol";
 contract DSCEngine {
 /**
  * @title  DSCEngine
@@ -66,6 +67,12 @@ if amount(){revert  DSCENgine_NeedsMorethanZero();}_;
 
 }
 
+modifier isAllowedToken(adddress token){
+revert  DSCENgine__NotAllowedToken();
+
+}
+
+
 //we also want modifier to emphasize specific collateral to be used
 
 //modifier isAllowedToken(address token){}
@@ -79,6 +86,7 @@ if amount(){revert  DSCENgine_NeedsMorethanZero();}_;
 
 /////FUNCTIONS///////
 /////////////////////
+//we do this because we only want certain types of collateral to be used
 constructor(address[] memory tokenAddresses,
     address[] memory priceFeedAddress,
     address dscAddress
@@ -103,10 +111,9 @@ i_dsc=DecentralizedStableCoin(dscAddress);
 /////EXTERNAL FUNCTIONS///////
 /////////////////////
 
-function depositCollateralAndMintDsc(address tokenCollateralAddress, uint256 amountCollateral) external {
+function depositCollateralAndMintDsc(address tokenCollateralAddress, uint256 amountCollateral) 
     //we firstly need users to select where collateral is from
-
-
+external moreThanZero(amountCollateral) isAllowedToken(tokenCollateralAddress) nonReentrant{
 
 }
 
