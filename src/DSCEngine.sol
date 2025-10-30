@@ -123,6 +123,7 @@ for(uint256 i=0;i<s_collateralTokens.length;i++){
 address token =s_collateralTokens[i];
 uint256 amount = s_collateralDeposited[user][token];
 totalCollateralValueInUsd +=getUsdValue(token*amount);
+//it will return total DSC and total collateral value in USD
 return totalCollateralValueInUsd;//getting the collateral value in USD
 
 }//loop through tokens and add up the value usd of the tokens
@@ -140,8 +141,11 @@ AggregatorV3Interface priceFeed = AggregatorV3Interface(s_priceFeeds(token));//h
 return (uint256(price*ADDITIONAL_FEED_PRECISION)*amount)/PRECISION;
 
 
-
-
+function _revertIfHealthFactorIsBroken(address user) internal view {
+//check health factor ->if they have enough collateral
+//revert if they dont
+(uint256 totalDscMinted, uint256 collateralValueInUsd)=_getAccountInformation(user);
+return (collateralValueInusd/TotalDscMinted);//100/100 if we go to 99/100 then we are under colateralised 
 }
 
 function depositCollateralAndMintDsc(address tokenCollateralAddress, uint256 amountCollateral) 
