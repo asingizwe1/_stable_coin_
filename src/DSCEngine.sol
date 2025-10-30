@@ -61,7 +61,8 @@ error  DSCENgine_TransferFailed();
 /////STATE VARIABLES///////
 /////////////////////
 //refer to chainlink price feed
-PRECISION=1e18;
+PRECISION = 1e18;
+uint256 private constant LIQUIDATION_THRESHOLD=50;//200% over collateralised
 uint256 private constant ADDITIONAL_FEED_PRECISION =1e10;
 mapping(address token=>address PriceFeed) private s_priceFeed;//tokenToPriceFeed
 
@@ -144,8 +145,7 @@ return (uint256(price*ADDITIONAL_FEED_PRECISION)*amount)/PRECISION;
 function _revertIfHealthFactorIsBroken(address user) internal view {
 //check health factor ->if they have enough collateral
 //revert if they dont
-(uint256 totalDscMinted, uint256 collateralValueInUsd)=_getAccountInformation(user);
-return (collateralValueInusd/TotalDscMinted);//100/100 if we go to 99/100 then we are under colateralised 
+
 }
 
 function depositCollateralAndMintDsc(address tokenCollateralAddress, uint256 amountCollateral) 
@@ -182,7 +182,8 @@ function liquidate() external {
 function mint() external {   
 
 }
-function getHealthFactor() external view {
+function _getHealthFactor() external view {
 //show healthy people are
-
+(uint256 totalDscMinted, uint256 collateralValueInUsd)=_getAccountInformation(user);
+return (collateralValueInusd/TotalDscMinted);//100/100 if we go to 99/100 then we are under colateralised 
 }}
