@@ -55,12 +55,13 @@ contract DSCEngine is ReentrancyGuard {
 error DSCENgine_NeedsMorethanZero();
 error  DSCENgine__TokenAddressesAndPriceFeedAddressesMustBeSameLength();
 error  DSCENgine__NotAllowedToken();
-error  DSCENgine_TransferFailed();
-
+error  DSCENgine__TransferFailed();
+error DSCENgine__BreaksHealthFactor(uint256 healthFactor);
 
 /////STATE VARIABLES///////
 /////////////////////
 //refer to chainlink price feed
+uint256 private constant MIN_HEALTH_FACTOR=1;
 PRECISION = 1e18;
 uint256 private constant LIQUIDATION_THRESHOLD=50;//200% over collateralised
 uint256 private constant ADDITIONAL_FEED_PRECISION =1e10;
@@ -145,8 +146,26 @@ return (uint256(price*ADDITIONAL_FEED_PRECISION)*amount)/PRECISION;
 function _revertIfHealthFactorIsBroken(address user) internal view {
 //check health factor ->if they have enough collateral
 //revert if they dont
+uint256 userHealthFactor=_healthFactor(user);
+if (userHealthFactor<MIN_HEALTH_FACTOR){
+  revert DSC__Engine__BreaksHealthFcator(userHealthFactor)
 
 }
+
+}
+
+function MintDsc( uint256 amountDscToMint) external moreThanZero(amountDscToMint) nonReentrant {
+
+_revertIfHealthFactorIsBroken(msg.sender);
+
+
+}
+    //we firstly need users to select where collateral is from
+external moreThanZero(amountCollateral) isAllowedToken(tokenCollateralAddress) nonReentrant{
+
+}
+
+ 
 
 function depositCollateralAndMintDsc(address tokenCollateralAddress, uint256 amountCollateral) 
     //we firstly need users to select where collateral is from
@@ -185,5 +204,6 @@ function mint() external {
 function _getHealthFactor() external view {
 //show healthy people are
 (uint256 totalDscMinted, uint256 collateralValueInUsd)=_getAccountInformation(user);
-return (collateralValueInusd/TotalDscMinted);//100/100 if we go to 99/100 then we are under colateralised 
+uint256 collateralAdjustedForThreshold=(collateralValueInUsd*LIQUIDATION_THRESHOLD)/100;
+//return (collateralValueInusd/TotalDscMinted);//100/100 if we go to 99/100 then we are under colateralised 
 }}
