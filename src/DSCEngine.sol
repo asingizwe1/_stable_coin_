@@ -155,7 +155,8 @@ if (userHealthFactor<MIN_HEALTH_FACTOR){
 }
 
 function MintDsc( uint256 amountDscToMint) external moreThanZero(amountDscToMint) nonReentrant {
-
+s_DSCMinted [msg.sender]+=amountDscToMint;
+//we shouldnt allow anyone to mint dsc if the are going to get them selves liquidated
 _revertIfHealthFactorIsBroken(msg.sender);
 
 
@@ -198,7 +199,20 @@ function liquidate() external {
 //removes people's positions as it gets under collateralised to save the protocol
 }
 
-function mint() external {   
+function mint(address _to,uint256 _amount) external onlyOwner returns (bool) {   
+if(_to==address(0)){
+    revert  DecentralizedStableCoin__NotZeroAddress();
+
+
+}
+if (_amount<=0){
+revert DecentralizedStableCoin__NeedsMoreThanZero();
+
+
+}
+
+_mint(_to,_amount);
+return true;
 
 }
 function _getHealthFactor() external view {
