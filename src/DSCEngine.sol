@@ -157,7 +157,12 @@ if (userHealthFactor<MIN_HEALTH_FACTOR){
 function MintDsc( uint256 amountDscToMint) external moreThanZero(amountDscToMint) nonReentrant {
 s_DSCMinted [msg.sender]+=amountDscToMint;
 //we shouldnt allow anyone to mint dsc if the are going to get them selves liquidated
-_revertIfHealthFactorIsBroken(msg.sender);
+_revertIfHealthFactorIsBroken(msg.sender,amountDscToMint);
+if(!minted)
+{
+revert DSCEngine__MintFailed();
+
+}
 
 
 }
