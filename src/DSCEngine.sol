@@ -154,7 +154,7 @@ if (userHealthFactor<MIN_HEALTH_FACTOR){
 
 }
 
-function MintDsc( uint256 amountDscToMint) external moreThanZero(amountDscToMint) nonReentrant {
+function MintDsc( uint256 amountDscToMint) public moreThanZero(amountDscToMint) nonReentrant {
 s_DSCMinted [msg.sender]+=amountDscToMint;
 //we shouldnt allow anyone to mint dsc if the are going to get them selves liquidated
 _revertIfHealthFactorIsBroken(msg.sender,amountDscToMint);
@@ -172,14 +172,29 @@ external moreThanZero(amountCollateral) isAllowedToken(tokenCollateralAddress) n
 
 }
 
- 
-
-function depositCollateralAndMintDsc(address tokenCollateralAddress, uint256 amountCollateral) 
+ /*
+ *@param tokenCollateralAddress
+ *@param amountCollateral
+ *@param amountDscToMint
+ * @notice This function deposits collateral and mints DSC in one transaction
+ */
+//so basically this one can do 2 functions at once
+function depositCollateralAndMintDsc(address tokenCollateralAddress, uint256 amountCollateral,uint256 amountDscToMint) 
     //we firstly need users to select where collateral is from
 external moreThanZero(amountCollateral) isAllowedToken(tokenCollateralAddress) nonReentrant{
+depositCollateral(tokenCollateralAddress,amountCollateral);
+mintDsc(amountDscToMint);
+
 
 }
 
+function depositCollateral(address tokenCollateralAddress,uint256 amountCollateral) public
+moreThanZero(amountCollateral) isAllowedToken(tokenCollateralAddress) nonReentrant {
+ {    
+//set threshold
+s_collateralDeposited[msg.sender][tokenCollateralAddress]+=amountCollateral;
+IERC20(tokenCollateralAddress).transferFrom(msg.sender,address(this),amountCollateral);
+}
 
 function redeemCollateralForDsc() external {    
 //set threshold
