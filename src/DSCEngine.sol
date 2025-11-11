@@ -158,6 +158,7 @@ function MintDsc( uint256 amountDscToMint) external moreThanZero(amountDscToMint
 s_DSCMinted [msg.sender]+=amountDscToMint;
 //we shouldnt allow anyone to mint dsc if the are going to get them selves liquidated
 _revertIfHealthFactorIsBroken(msg.sender,amountDscToMint);
+bool minted =i_dsc.mint(msg.sender,amountDscToMint);
 if(!minted)
 {
 revert DSCEngine__MintFailed();
