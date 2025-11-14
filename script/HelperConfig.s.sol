@@ -2,6 +2,13 @@
 pragma solidity ^0.8.18;    
 
 import {Script} from "forge-std/Script.sol";
+//import your different mocks for testing
+
+//you deploy MockV3Aggregator and it behaves like a Chainlink oracle, but you control the price manually.
+//a fake / simulated Chainlink price feed contract used in your local development and testing environment.
+import {MockV3Aggregator} from "..test/mocks/MockV3Aggregator.sol";
+// the mock contracts contain replicas of the respective assets
+import {ERC20Mock} from "@openzeppelin/contracts/mocks/ERC20Mock.sol";
 
 contract HelperConfig is Script{
 struct NetworkConfig{
@@ -26,6 +33,13 @@ function getSepoliaEthConfig() public pure returns(NetworkConfig memory){
 
 }
 
+function getorCreateAnvilEthConfig() public returns (NetworkConfig memory){
+//mock deployments
+if(activeNetworkConfig.wethUsdPriceFeed!=address(0)){
+return activeNetworkConfig;
 
+} 
+
+}
 
 }
