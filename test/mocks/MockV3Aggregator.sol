@@ -1,74 +1,97 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.0;
 
-import "@chainlink/contracts/src/v0.8/interfaces/AggregatorV3Interface.sol";
+/**
+ * @title MockV3Aggregator
+ * @notice Based on the FluxAggregator contract
+ * @notice Use this contract when you need to test
+ * other contract's ability to read data from an
+ * aggregator contract, but how the aggregator got
+ * its answer is unimportant
+ */
+contract MockV3Aggregator {
+    uint256 public constant version = 0;
 
-contract MockV3Aggregator is AggregatorV3Interface {
-    uint8 public override decimals;
-    int256 public override latestAnswer;
-    uint80 public override latestRoundId;
-    mapping(uint80 => int256) public getAnswer;
-    mapping(uint80 => uint256) public getTimestamp;
-    mapping(uint80 => uint80) public getAnsweredInRound;
+    uint8 public decimals;
+    int256 public latestAnswer;
+    uint256 public latestTimestamp;
+    uint256 public latestRound;
+
+    mapping(uint256 => int256) public getAnswer;
+    mapping(uint256 => uint256) public getTimestamp;
+    mapping(uint256 => uint256) private getStartedAt;
 
     constructor(uint8 _decimals, int256 _initialAnswer) {
         decimals = _decimals;
-        latestAnswer = _initialAnswer;
-        latestRoundId = 1;
-        getAnswer[1] = _initialAnswer;
-        getTimestamp[1] = block.timestamp;
-        getAnsweredInRound[1] = 1;
+        updateAnswer(_initialAnswer);
     }
 
-    function roundData(uint80 _roundId) internal view returns (
-        uint80 roundId,
-        int256 answer,
-        uint256 startedAt,
-        uint256 updatedAt,
-        uint80 answeredInRound
-    ) {
-        roundId = _roundId;
-        answer = getAnswer[_roundId];
-        startedAt = getTimestamp[_roundId];
-        updatedAt = getTimestamp[_roundId];
-        answeredInRound = getAnsweredInRound[_roundId];
+    function updateAnswer(int256 _answer) public {
+        latestAnswer = _answer;
+        latestTimestamp = block.timestamp;
+        latestRound++;
+        getAnswer[latestRound] = _answer;
+        getTimestamp[latestRound] = block.timestamp;
+        getStartedAt[latestRound] = block.timestamp;
     }
 
-    function latestRoundData() external view override returns (
-        uint80 roundId,
-        int256 answer,
-        uint256 startedAt,
-        uint256 updatedAt,
-        uint80 answeredInRound
-    ) {
-        return roundData(latestRoundId);
+    function updateRoundData(
+        uint80 _roundId,
+        int256 _answer,
+        uint256 _timestamp,
+        uint256 _startedAt
+    ) public {
+        latestRound = _roundId;
+        latestAnswer = _answer;
+        latestTimestamp = _timestamp;
+        getAnswer[latestRound] = _answer;
+        getTimestamp[latestRound] = _timestamp;
+        getStartedAt[latestRound] = _startedAt;
     }
 
-    function getRoundData(uint80 _roundId) external view override returns (
-        uint80 roundId,
-        int256 answer,
-        uint256 startedAt,
-        uint256 updatedAt,
-        uint80 answeredInRound
-    ) {
-        require(getTimestamp[_roundId] != 0, "No data present for round");
-        return roundData(_roundId);
+    function getRoundData(
+        uint80 _roundId
+    )
+        external
+        view
+        returns (
+            uint80 roundId,
+            int256 answer,
+            uint256 startedAt,
+            uint256 updatedAt,
+            uint80 answeredInRound
+        )
+    {
+        return (
+            _roundId,
+            getAnswer[_roundId],
+            getStartedAt[_roundId],
+            getTimestamp[_roundId],
+            _roundId
+        );
     }
 
-    // You can add a helper function to update the price manually in tests:
-    function updateAnswer(int256 _newAnswer) external {
-        latestRoundId += 1;
-        latestAnswer = _newAnswer;
-        getAnswer[latestRoundId] = _newAnswer;
-        getTimestamp[latestRoundId] = block.timestamp;
-        getAnsweredInRound[latestRoundId] = latestRoundId;
+    function latestRoundData()
+        external
+        view
+        returns (
+            uint80 roundId,
+            int256 answer,
+            uint256 startedAt,
+            uint256 updatedAt,
+            uint80 answeredInRound
+        )
+    {
+        return (
+            uint80(latestRound),
+            getAnswer[latestRound],
+            getStartedAt[latestRound],
+            getTimestamp[latestRound],
+            uint80(latestRound)
+        );
     }
 
-    function description() external pure override returns (string memory) {
-        return "MockV3Aggregator";
-    }
-
-    function version() external pure override returns (uint256) {
-        return 0;
+    function description() external pure returns (string memory) {
+        return "v0.6/tests/MockV3Aggregator.sol";
     }
 }

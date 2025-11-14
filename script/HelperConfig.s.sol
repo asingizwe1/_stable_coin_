@@ -39,7 +39,8 @@ if(activeNetworkConfig.wethUsdPriceFeed!=address(0)){
 return activeNetworkConfig;
 
 } 
-
+vm.startBroadcast();
+MockV3Aggregator ethUsdPriceFeed=new MockV3Aggregator(8,2000e8);
 }
 
 }
