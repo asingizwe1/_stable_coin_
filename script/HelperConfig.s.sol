@@ -19,6 +19,11 @@ struct NetworkConfig{
           uint256 deployerKey;
 
 }
+uint8 public constant DECIMALS=8;
+int256 public constant ETH_USD_PRICE=2000e8;
+int256 public constant BTC_USD_PRICE=1000e8;
+
+
 NetworkConfig public activeNetworkConfig;
 constructor(){}
 
@@ -40,7 +45,15 @@ return activeNetworkConfig;
 
 } 
 vm.startBroadcast();
-MockV3Aggregator ethUsdPriceFeed=new MockV3Aggregator(8,2000e8);
+MockV3Aggregator ethUsdPriceFeed=new MockV3Aggregator(DECIMALS,ETH_USD_PRICE);
+ERC20Mock wethMock=new ERC20Mock("WETH","WETH"msg.sender,1000E8);
+
+MockV3Aggregator btcUsdPriceFeed=new MockV3Aggregator(DECIMALS,ETH_USD_PRICE);
+ERC20Mock wethMock=new ERC20Mock("WETH","WETH"msg.sender,1000E8);
+
+vm.stopBroadcast();
+
 }
+
 
 }
