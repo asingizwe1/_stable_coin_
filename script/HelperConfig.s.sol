@@ -22,10 +22,18 @@ struct NetworkConfig{
 uint8 public constant DECIMALS=8;
 int256 public constant ETH_USD_PRICE=2000e8;
 int256 public constant BTC_USD_PRICE=1000e8;
-
+uint256 public DEFAULT_ANVIL_KEY=;
 
 NetworkConfig public activeNetworkConfig;
-constructor(){}
+constructor(){
+if(block.chainid==11155111){
+activeNetworkConfig=getSepoliaEthConfig();
+}else{
+activeNetworkConfig=getOrCreateAnvilEthConfig();
+}
+
+
+}
 
 function getSepoliaEthConfig() public pure returns(NetworkConfig memory){
   return NetworkConfig({
@@ -49,10 +57,18 @@ MockV3Aggregator ethUsdPriceFeed=new MockV3Aggregator(DECIMALS,ETH_USD_PRICE);
 ERC20Mock wethMock=new ERC20Mock("WETH","WETH"msg.sender,1000E8);
 
 MockV3Aggregator btcUsdPriceFeed=new MockV3Aggregator(DECIMALS,ETH_USD_PRICE);
-ERC20Mock wethMock=new ERC20Mock("WETH","WETH"msg.sender,1000E8);
+ERC20Mock wbtcMock=new ERC20Mock("WETH","WETH"msg.sender,1000E8);
 
 vm.stopBroadcast();
+return NetworkConfig{
+wethUsdPriceFeed:address(ethUsdPriceFeed),
+wethUsdPriceFeed:address(btcUsdPriceFeed),
+weth:address(wethMock),
+wbtc:address(wbtcMock),
+deployerKey: DEFAULT_ANVIL_KEY
 
+
+}
 }
 
 
