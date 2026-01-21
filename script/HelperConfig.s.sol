@@ -26,6 +26,7 @@ uint256 public DEFAULT_ANVIL_KEY=;
 
 NetworkConfig public activeNetworkConfig;
 constructor(){
+  //run exevertime script is executed
 if(block.chainid==11155111){
 activeNetworkConfig=getSepoliaEthConfig();
 }else{
@@ -52,6 +53,8 @@ if(activeNetworkConfig.wethUsdPriceFeed!=address(0)){
 return activeNetworkConfig;
 
 } 
+//we start a new broadcast to deploy the mock price feeds
+//from MockV3Aggregator
 vm.startBroadcast();
 MockV3Aggregator ethUsdPriceFeed=new MockV3Aggregator(DECIMALS,ETH_USD_PRICE);
 ERC20Mock wethMock=new ERC20Mock("WETH","WETH"msg.sender,1000E8);

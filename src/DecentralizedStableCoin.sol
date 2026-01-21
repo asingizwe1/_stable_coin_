@@ -39,6 +39,7 @@ import {Ownable} from "@openzeppelin/contracts/access/Ownable.sol";
  */
 
 contract DecentralizedStableCoin is ERC20Burnable,Ownable {
+    //it is ownable but there is a function to transfer it to the engine
     /////////////////
     // Constructor //
     /////////////////
