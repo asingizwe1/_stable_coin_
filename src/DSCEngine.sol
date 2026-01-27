@@ -56,6 +56,7 @@ error  DSCENgine__TokenAddressesAndPriceFeedAddressesMustBeSameLength();
 error  DSCENgine__NotAllowedToken();
 error  DSCENgine__TransferFailed();
 error DSCENgine__BreaksHealthFactor(uint256 healthFactor);
+error DSCEngine__HealthFactorNotImproved();
 
 /////STATE VARIABLES///////
 /////////////////////
@@ -71,7 +72,7 @@ DecentralizedStableCoin private immutable i_dsc;
 
 /////EVENTS///////
 /////////////////////
-event CollateralRedeemed(address indexed user,address indexed token, uint256 indexed amount);
+event CollateralRedeemed(address indexed redeemedFrom,address indexed redeemedTo,address indexed token, uint256  amount);
 
 /////MODIFIERS///////
 /////////////////////
@@ -173,6 +174,7 @@ if (userHealthFactor<MIN_HEALTH_FACTOR){
 
 }
 
+//we only mint dsc when we have enough collateral
 function MintDsc( uint256 amountDscToMint) public moreThanZero(amountDscToMint) nonReentrant {
 s_DSCMinted [msg.sender]+=amountDscToMint;
 //we shouldnt allow anyone to mint dsc if the are going to get them selves liquidated
@@ -216,7 +218,7 @@ IERC20(tokenCollateralAddress).transferFrom(msg.sender,address(this),amountColla
 }
 
 
-
+//we have to also make an interanl burn dsc functiomn that allows us to burn from anybody
 //this function will reduce the mapping of s_DSCMinted
 //we make it public because we are burning dsc and redeeming collateral at the same time
 function burnDsc(uint256 amount) public  moreThanZero(amount) {    
@@ -244,7 +246,19 @@ function redeemCollateralForDsc(address tokenCollateralAddress, uint256 amountCo
 
 } 
 
+function _burnDsc(uint256 amountDscToBurn,address onBehalfOf, address dscFrom) private
+{
+ s_DSCMinted[msg.sender]-=amount;
 
+bool success=i_dsctransferFrom(msg.sender,address(this),amount)
+if(!success){
+revert DSCEngine__TransactionFailed();
+}
+i_dsc.burn(amount);
+
+_revertIfHealthFactorIsBroken(msg.sender);
+
+}
 
 //CEI: CHECK,Effects,interactions
 
@@ -252,23 +266,26 @@ function redeemCollateralForDsc(address tokenCollateralAddress, uint256 amountCo
 //inorder to redeem collateral
 //1. health factor must be over 1 AFTER collateral pulled
 //you pass in address of collateral because you want then to choose which collateral they want
+//so its a random person whose collateral we are to redeem not our 3rd party person
+//we are going to refactor this so that we have an internal redeem collateral function
 function redeemCollateral(address tokenCollateralAddress,uint256 amountCollateral)
  external
 moreThanZero(amountCollateral)//you dont want them to be sending 0 transactions
 nonReentrant
  {   
 //update internal accounting
-s_collateralDeposited[msg.sender][tokenCollateralAddress]-=amountCollateral;//if you pull out more it will throw an error
-//in solidity when dont do the unsafe math
-emit CollateralRedeemed(msg.sender,tokenCollateralAddress ,amountCollateral);
-//_calculaterHealthFactor(); calling this is gas inefficient so you first make transaction and if it fails revert
-bool success=IERC20(tokenCollateralAddress).transfer(msg.sender,amountCollateral);
-//if someone oays back your minted DSC they can have all your collateral
-//this will motivate people to pay back their DSC and always have collateral
-//this format followed breaks CEI
-if(!success){
-revert DSCEngine__TransferFailed();
-}
+// s_collateralDeposited[msg.sender][tokenCollateralAddress]-=amountCollateral;//if you pull out more it will throw an error
+// //in solidity when dont do the unsafe math
+// emit CollateralRedeemed(msg.sender,tokenCollateralAddress ,amountCollateral);
+// //_calculaterHealthFactor(); calling this is gas inefficient so you first make transaction and if it fails revert
+// bool success=IERC20(tokenCollateralAddress).transfer(msg.sender,amountCollateral);
+// //if someone oays back your minted DSC they can have all your collateral
+// //this will motivate people to pay back their DSC and always have collateral
+// //this format followed breaks CEI
+// if(!success){
+// revert DSCEngine__TransferFailed();
+// }
+_redeemCollateral(msg.sender,msg.sender, tokenCollateralAddress,amountCollateral);
 _revertIfHealthFactorIsBroken(msg.sender);
 }
 
@@ -303,7 +320,38 @@ uint256 tokenAmountFromDebtCovered=getTokenAmountFromUsd(collateral,debtToCover)
 //we should implement a feature to liquidate in the event the protocol is insolvent
 //and sweep extra amounts into a treasury
 uint256 bonusCollateral= (tokenAmountFromDebtCovered*LIQUIDATION_BONUS)/LIQUIDATION_PRECISION;
+_redeemCollateral(user,msg.sender,collateral,totalCollateralToRedeem);
+//when we call liquidate we shall redeem to who ever is calling liquidate
+_burnDsc(debtToCover,msg.sender,user);
+//since we are doing internal calls with no checks we have to check if health factor is okay
+uint256 endingUserHealthFactor=_healthFactor(user);
+if(endingUserHealthFactor<=startingUserHealthFactor){
+    revert DSCEngine__HealthFactorNotImproved();
+
 }
+_revertIfHealthFactorIsBroken(msg.sender);//we also have to make sure the liquidator is safe
+ }
+
+function _redeemCollateral(address tokenCollateralAddress,uint256 amountCollateral, address from, address to)
+ private
+ {
+  
+//update internal accounting
+s_collateralDeposited[from][tokenCollateralAddress]-=amountCollateral;//if you pull out more it will throw an error
+//in solidity when dont do the unsafe math
+emit CollateralRedeemed(from,to,tokenCollateralAddress ,amountCollateral);
+//_calculaterHealthFactor(); calling this is gas inefficient so you first make transaction and if it fails revert
+bool success=IERC20(tokenCollateralAddress).transfer(to,amountCollateral);
+//if someone oays back your minted DSC they can have all your collateral
+//this will motivate people to pay back their DSC and always have collateral
+//this format followed breaks CEI
+if(!success){
+revert DSCEngine__TransferFailed();
+}
+_revertIfHealthFactorIsBroken(msg.sender);
+
+
+ }
 
 function mint(address _to,uint256 _amount) external onlyOwner returns (bool) {   
 if(_to==address(0)){
