@@ -322,7 +322,7 @@ uint256 tokenAmountFromDebtCovered=getTokenAmountFromUsd(collateral,debtToCover)
 uint256 bonusCollateral= (tokenAmountFromDebtCovered*LIQUIDATION_BONUS)/LIQUIDATION_PRECISION;
 _redeemCollateral(user,msg.sender,collateral,totalCollateralToRedeem);
 //when we call liquidate we shall redeem to who ever is calling liquidate
-_burnDsc(debtToCover,msg.sender,user);
+_burnDsc(debtToCover,msg.sender,user);//these 2 functions are making external calls to external contracts
 //since we are doing internal calls with no checks we have to check if health factor is okay
 uint256 endingUserHealthFactor=_healthFactor(user);
 if(endingUserHealthFactor<=startingUserHealthFactor){
