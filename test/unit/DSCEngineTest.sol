@@ -92,10 +92,32 @@ vm.stopPrank();
 
 function testCanDepositCollateralAndGetAccountInfo()
  public
+ depositedColateral
  {
-
-
+(uint256 totalDscMinted,uint256 collateralValueInUsd)=dsce.getAccountInformation(USER);
+//we ensure that totalDscMinted and collateralValueInUsd are both zero since we have only deposited collateral
+uint256 expectedTotalDscMinted=0;
+uint256 expectedDepositAmount=dsce.getTokenAmountFromUsd(weth,collateralValueInUsd);
+assertEq(totalDscMinted,expectedTotalDscMinted);
+assertEq(AMOUNT_COLLATERAL,expectedDepositAmount);
+// Both assertions verify that after depositing collateral (but not minting DSC), the contract correctly tracked the deposit amount and that no DSC was minted.
 }
+/**
+ * First Assertion: totalDscMinted == expectedTotalDscMinted
+totalDscMinted: The actual DSC stablecoin tokens the USER has minted (retrieved from the contract)
+expectedTotalDscMinted: The DSC tokens we expect them to have minted (which is 0)
+Why? The test only deposited collateral—it never minted any DSC tokens, so this should be zero
+Second Assertion: AMOUNT_COLLATERAL == expectedDepositAmount
+AMOUNT_COLLATERAL: The exact amount of collateral tokens originally deposited by the USER (a constant defined elsewhere in the test)
+expectedDepositAmount: The amount we calculate by converting the collateral's USD value back into token amounts
+Why? This verifies the round-trip conversion works correctly:
+User deposits X tokens of collateral
+Contract converts it to USD value
+We convert that USD value back to tokens
+Result should equal the original X tokens deposited
+
+ */
+
 
 
 }
