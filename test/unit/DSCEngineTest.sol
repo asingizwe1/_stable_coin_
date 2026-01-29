@@ -85,11 +85,14 @@ vm.stopPrank();
 modifier depositedColateral(){
 vm.startPrank(USER);
 ERC20Mock(weth).approve(address(dsce),AMOUNT_COLLATERAL);
-
+dsce.depositCollateral(weth,AMOUNT_COLLATERAL);
+vm.stopPrank();
 }
 
 
-function testCanDepositCollateralAndGetAccountInfo() public{
+function testCanDepositCollateralAndGetAccountInfo()
+ public
+ {
 
 
 }
