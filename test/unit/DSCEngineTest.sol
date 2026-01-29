@@ -81,5 +81,19 @@ dsce.depositCollateral(address(ranToken),AMOUNT_COLLATERAL);
 vm.stopPrank();
 }
 
+//modifiers prevent code repetition especially since we are depositing many times
+modifier depositedColateral(){
+vm.startPrank(USER);
+ERC20Mock(weth).approve(address(dsce),AMOUNT_COLLATERAL);
+
+}
+
+
+function testCanDepositCollateralAndGetAccountInfo() public{
+
+
+}
+
+
 }
 
