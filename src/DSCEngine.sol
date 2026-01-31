@@ -332,6 +332,25 @@ if(endingUserHealthFactor<=startingUserHealthFactor){
 _revertIfHealthFactorIsBroken(msg.sender);//we also have to make sure the liquidator is safe
  }
 
+    function _healthFactor(address user) private view returns (uint256) {
+        (uint256 totalDscMinted, uint256 collateralValueInUsd) = _getAccountInformation(user);
+        return _calculateHealthFactor(totalDscMinted, collateralValueInUsd);
+    }
+
+//the reason i created this internal function is because we are using it in multiple places
+function _calculateHealthFactor(
+        uint256 totalDscMinted,
+        uint256 collateralValueInUsd
+    ) 
+        internal
+        pure
+        returns (uint256)
+    {
+        if (totalDscMinted == 0) return type(uint256).max;
+        uint256 collateralAdjustedForThreshold = (collateralValueInUsd * LIQUIDATION_THRESHOLD) / LIQUIDATION_PRECISION;
+        return (collateralAdjustedForThreshold * PRECISION) / totalDscMinted;
+    }
+
 function _redeemCollateral(address tokenCollateralAddress,uint256 amountCollateral, address from, address to)
  private
  {
