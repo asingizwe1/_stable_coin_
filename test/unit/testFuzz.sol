@@ -39,3 +39,8 @@ assert(exampleContract.shouldAlwaysBeZero()==0);
 // exampleContract.shouldAlwaysBeZero()
 // you’re actually calling that auto-generated getter function to read the value.
 // That’s why it looks like a function call, even though it’s just accessing the variable.
+
+
+// STEPS TO HANDLES INVARIANTS
+// UNDERSTAND THE INVARIANTS THEN
+//  WRITE FUNCTIONS TO EXECUTE THEM

@@ -337,6 +337,19 @@ _revertIfHealthFactorIsBroken(msg.sender);//we also have to make sure the liquid
         return _calculateHealthFactor(totalDscMinted, collateralValueInUsd);
     }
 
+
+ function calculateHealthFactor(
+        uint256 totalDscMinted,
+        uint256 collateralValueInUsd
+    )
+        external
+        pure
+        returns (uint256)
+    {
+        return _calculateHealthFactor(totalDscMinted, collateralValueInUsd);
+    }
+
+
 //the reason i created this internal function is because we are using it in multiple places
 function _calculateHealthFactor(
         uint256 totalDscMinted,
@@ -347,6 +360,8 @@ function _calculateHealthFactor(
         returns (uint256)
     {
         if (totalDscMinted == 0) return type(uint256).max;
+        //if some one has no collateral when he has 0 then it will break
+        //thats why we add the above
         uint256 collateralAdjustedForThreshold = (collateralValueInUsd * LIQUIDATION_THRESHOLD) / LIQUIDATION_PRECISION;
         return (collateralAdjustedForThreshold * PRECISION) / totalDscMinted;
     }
