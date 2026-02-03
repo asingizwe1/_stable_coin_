@@ -15,6 +15,7 @@ import {DSCEngine} from "../../src/DSCEngine.sol";
 import {HelperConfig} from "../../script/HelperConfig.s.sol";
 import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 
+import {Handler} from "./Handler.t.sol";
 contract Invariants is StdInvariant, Test
 {
     DeployDSC deployer;
@@ -23,11 +24,16 @@ contract Invariants is StdInvariant, Test
     HelperConfig config;
     address weth;
     address wbtc;
+    Handler handler;
 function setUp() external{
 deployer= new DeplyDSC();
 (dsc,dsce,config)=deployer.run();
 (,,(weth),(wbtc),)=helperConfig.activeNetworkCong();
-targetContract(address(dsce));
+//targetContract(address(dsce));
+//instead of having our target handler as dsce we are going to use our handler
+handler = new Handler(dsce,dec);
+targetContract(address(handler));//so our target contract is handler's address
+//calling the target contract dsce in a fixed way using a handler
 }
 function invariant_protocolMustHvaeMoreValueThanTotalSupply() public view{
     //get all the value of all the collateral in the protocol
