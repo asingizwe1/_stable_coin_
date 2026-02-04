@@ -45,7 +45,13 @@ vm.stopPrank();
 //ability to redeem max amount they have in sysytem
 function redeemCollateral(uint256 collateralSeed, uint256 amountCollateral) public {
 ERC20Mock collateral =_getCollateralFromSeed(collateralSeed);
-
+//will get total collateral of the user
+uint256 maxCollateralToRedeem=dsce.getCollateralBalanceOfUser(address(collateral),msg.sender);
+amountCollateral=bound(amountCollateral,0,maxCollateralToRedeem);
+if(amountCollateral==0){
+    return;
+}//basically if amount collateral is 0 then that function wont be run
+dsce.redeemCollateral(address(collateral),amountCollateral);
 }
 
 function _getCollateralFromSeed(uint256 collateralSeed) private view returns (ERC20Mock){
