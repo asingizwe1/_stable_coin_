@@ -26,6 +26,23 @@ address[] memory collateralTokens= dsce.getCollateralTokens();
 weth=ERC20Mock(collateralTokens[0]);
 wbtc=ERC20Mock(collateralTokens[1]);
 }
+//some people can have 2 files 
+//1)fail on revert - every single transaction you run your test on is going to pass 
+//2)continue on revert -  quicker and looser
+
+function mintDsc(uint256 amountDsc) public {
+amountDsc=bound(amount,1,dsce.MAX_DEPOSIT_SIZE);
+vm.startPrank(msgSender);
+(uint256 totalDscMinted, uint256 collateralValueInUsd)=dsce.getAccountInformation(msg.sender);
+uint256 maxDscToMint=(collateralValueInUsd/2)-totalDscMinted;
+if(maxDscToMint<0){
+
+return;
+
+}
+dsce.mintDsc(amountDsc);
+vm.startPrank();
+}
 
 //redeem collateral
 //we set it up in a wasy that the transaction always goes through
