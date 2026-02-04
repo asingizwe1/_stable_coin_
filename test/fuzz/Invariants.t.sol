@@ -31,10 +31,14 @@ deployer= new DeplyDSC();
 (,,(weth),(wbtc),)=helperConfig.activeNetworkCong();
 //targetContract(address(dsce));
 //instead of having our target handler as dsce we are going to use our handler
-handler = new Handler(dsce,dec);
+handler = new Handler(dsce,dsc);
 targetContract(address(handler));//so our target contract is handler's address
 //calling the target contract dsce in a fixed way using a handler
+//we want to call this is a sensible manner
+//like dont call redeemColateral, unless there is collateral to redeem
+
 }
+
 function invariant_protocolMustHvaeMoreValueThanTotalSupply() public view{
     //get all the value of all the collateral in the protocol
     //compare it to all the debt (dsc)

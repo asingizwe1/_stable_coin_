@@ -41,12 +41,23 @@ dsce.depositCollateral(address(collateral),amountCollateral);
 //seed will help us choose between weth and wbtc
 vm.stopPrank();
 }
+
+//ability to redeem max amount they have in sysytem
+function redeemCollateral(uint256 collateralSeed, uint256 amountCollateral) public {
+ERC20Mock collateral =_getCollateralFromSeed(collateralSeed);
+
+}
+
 function _getCollateralFromSeed(uint256 collateralSeed) private view returns (ERC20Mock){
 //we shall use this function to run line x
 if(collateralSeed %2==0){
     return ERC20Mock(address(weth));
 
 }return wbtc;
+}
 
 
-}}
+
+
+
+}
