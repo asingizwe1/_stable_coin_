@@ -31,8 +31,7 @@ wbtc=ERC20Mock(collateralTokens[1]);
 //2)continue on revert -  quicker and looser
 
 function mintDsc(uint256 amountDsc) public {
-amountDsc=bound(amount,1,dsce.MAX_DEPOSIT_SIZE);
-vm.startPrank(msgSender);
+
 (uint256 totalDscMinted, uint256 collateralValueInUsd)=dsce.getAccountInformation(msg.sender);
 uint256 maxDscToMint=(collateralValueInUsd/2)-totalDscMinted;
 if(maxDscToMint<0){
@@ -40,8 +39,16 @@ if(maxDscToMint<0){
 return;
 
 }
-dsce.mintDsc(amountDsc);
-vm.startPrank();
+amountDsc=bound(amount,0,uint256(maxDscToMint));
+
+if(amount==0){
+
+return;
+
+}
+vm.startPrank(msg.sender);
+dsce.mintDsc(amount);
+vm.stopPrank();
 }
 
 //redeem collateral
