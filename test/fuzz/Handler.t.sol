@@ -15,7 +15,7 @@ contract Handler is Test{
     ERC20 weth;
     ERC20 wbtc;
 uint256  public timesMintIsCalled;
-
+address[] public usersWithCollateralDeposited;
 uint256 MAX_DEPOSIT_SIZE=type(uint96).max;//this will give us a big number but we wont hit max deposit of uin256+1
 
     //we make a constructor so that the handler knows what dsc engine is
@@ -32,9 +32,12 @@ wbtc=ERC20Mock(collateralTokens[1]);
 //1)fail on revert - every single transaction you run your test on is going to pass 
 //2)continue on revert -  quicker and looser
 
-function mintDsc(uint256 amountDsc) public {
-
-(uint256 totalDscMinted, uint256 collateralValueInUsd)=dsce.getAccountInformation(msg.sender);
+function mintDsc(uint256 amount,uint256 addressSeed) public {
+    if(usersWithCollateralDeposited.length==0){return;}
+address sender=usersWithCollateralDeposited[addressSeed
+% usersWithCollateralDeposited.length
+];
+(uint256 totalDscMinted, uint256 collateralValueInUsd)=dsce.getAccountInformation(sender);
 uint256 maxDscToMint=(collateralValueInUsd/2)-totalDscMinted;
 if(maxDscToMint<0){
 
@@ -48,7 +51,7 @@ if(amount==0){
 return;
 
 }
-vm.startPrank(msg.sender);
+vm.startPrank(sender);
 dsce.mintDsc(amount);
 vm.stopPrank();
 timesMintIsCalled++;
@@ -67,6 +70,7 @@ dsce.depositCollateral(address(collateral),amountCollateral);
 //we tell it to eposit valid collateral
 //seed will help us choose between weth and wbtc
 vm.stopPrank();
+usersWithCollateralDeposited.puch(msg.sender);
 }
 
 //ability to redeem max amount they have in sysytem
