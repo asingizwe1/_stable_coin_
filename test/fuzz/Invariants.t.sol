@@ -52,6 +52,7 @@ uint256 wbtcValue=dsce.getUsdValue(wbtc,totalBtcDeposited);
 console.log("WETH VALUE:",wethValue);
 console.log("WBTC VALUE:",wbtcValue);
 console.log("TOTAL SUPPLY:",totalSupply);
+console.log("Times min called:",handler.timesMintIsCalled());
 
 assert(wethValue + wbtcValue >= totalSupply);
 //passing means there is no way to make the total supply lower than the total value

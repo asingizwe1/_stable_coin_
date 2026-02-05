@@ -14,6 +14,8 @@ contract Handler is Test{
     DecentralizedStablecoin dsc;
     ERC20 weth;
     ERC20 wbtc;
+uint256  public timesMintIsCalled;
+
 uint256 MAX_DEPOSIT_SIZE=type(uint96).max;//this will give us a big number but we wont hit max deposit of uin256+1
 
     //we make a constructor so that the handler knows what dsc engine is
@@ -49,6 +51,7 @@ return;
 vm.startPrank(msg.sender);
 dsce.mintDsc(amount);
 vm.stopPrank();
+timesMintIsCalled++;
 }
 
 //redeem collateral
