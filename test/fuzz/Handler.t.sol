@@ -8,6 +8,7 @@ pragma solidity ^0.8.19;
 import {Test} from "forge-std/Test.sol";
 import {DSCEngine} from "../../src/DSCEngine.sol";
 import {DecentralizedStablecoin} from "../../src/DecentralizedStablecoin.sol";
+import {MockV3Aggregator} from "../mocks/MockV3Aggregator.sol"
 
 contract Handler is Test{
     DSCEngine dsce;
@@ -17,6 +18,14 @@ contract Handler is Test{
 uint256  public timesMintIsCalled;
 address[] public usersWithCollateralDeposited;
 uint256 MAX_DEPOSIT_SIZE=type(uint96).max;//this will give us a big number but we wont hit max deposit of uin256+1
+MockV3Aggregator public ethusePriceFeed;
+
+//our handler should also show work being done with WETH and WBTC
+//price feed
+//WETH token
+//WBTC token
+
+
 
     //we make a constructor so that the handler knows what dsc engine is
 constructor(){
@@ -27,10 +36,12 @@ constructor(){
 address[] memory collateralTokens= dsce.getCollateralTokens();
 weth=ERC20Mock(collateralTokens[0]);
 wbtc=ERC20Mock(collateralTokens[1]);
+ethUsdPriceFeed=MockV3Aggregator(dsce.getCollateralTokenPriceFeed(address(weth)));
 }
-//some people can have 2 files 
-//1)fail on revert - every single transaction you run your test on is going to pass 
-//2)continue on revert -  quicker and looser
+
+// some people can have 2 files 
+// 1)fail on revert - every single transaction you run your test on is going to pass 
+// 2)continue on revert -  quicker and looser
 
 function mintDsc(uint256 amount,uint256 addressSeed) public {
     if(usersWithCollateralDeposited.length==0){return;}
@@ -72,6 +83,12 @@ dsce.depositCollateral(address(collateral),amountCollateral);
 vm.stopPrank();
 usersWithCollateralDeposited.puch(msg.sender);
 }
+
+//this breaks our invariant test suite if price drops rapidly below collateral
+// function updateCollateralPrice(uint96 newPrice) public{
+// int256 newPriceInt -int256(uint256(newPrice));
+// ethUsdPriceFeed.updateAnswer(newPriceInt);
+// }
 
 //ability to redeem max amount they have in sysytem
 function redeemCollateral(uint256 collateralSeed, uint256 amountCollateral) public {

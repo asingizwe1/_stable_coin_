@@ -61,4 +61,16 @@ assert(wethValue + wbtcValue >= totalSupply);
 
 }
 //forge test -m invariant_protocolMustHvaeMoreValueThanTotalSupply -vvvv
+
+//this is where we place all our getter functions
+//should always include
+function invariant_gettersShouldNotRevert() public view{
+dsce.getLiquidationBonus();
+dsce.getPrecision();
+
+}
+// TO ENSURE YOU ARE INCLUDING EVERYTHING
+// run- forge inspect DSCEngine methods -> gives methods with function selectors
+//use it to check if all functions are handled
+//thats why it is great to have get_ before functions to know which ones are getters
 }
