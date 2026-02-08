@@ -27,6 +27,7 @@ import {DecentralizedStableCoin} from "./DecentralizedStableCoin.sol";
 import {ReentrancyGuard} from "@openzeppelin/contracts/security/ReentrancyGuard.sol";
 import {IERC20} from "@oppenzippelin/contracts/token/ERC20/IERC20.sol";
 import {AggregatorV3Interface} from "chainlink/contracts/src/v0.8/interfaces/AggregatorV3Interface.sol" ;
+import {OracleLib} from "./libraries/OracleLib.sol";
 //forge install smartcontractkit/chainlink-brownie-contracts@0.6.1 --no-commit
 
 contract DSCEngine is ReentrancyGuard {
@@ -57,6 +58,10 @@ error  DSCENgine__NotAllowedToken();
 error  DSCENgine__TransferFailed();
 error DSCENgine__BreaksHealthFactor(uint256 healthFactor);
 error DSCEngine__HealthFactorNotImproved();
+
+/////TYPE///////
+/////////////////////
+using OracleLib for AggregatorV3Interface;
 
 /////STATE VARIABLES///////
 /////////////////////
@@ -157,7 +162,7 @@ function getUsdValue(address token,uint256 amount) public view returns (uint256)
 //we interruct with aggregator v3
 AggregatorV3Interface priceFeed = AggregatorV3Interface(s_priceFeeds(token));//here we get price feed of the token we are talking of
 //we get price by saying priceFeed.latestRoundData();
-{,int256 price,,,}=priceFeed.latestRoundData();
+{,int256 price,,,}=priceFeed.staleCheckLatestRoundData();
 //1ETH=1000$
 //The returned value from CL will be 1000*1e8 because in documentation it shows 8dp
 return (uint256(price*ADDITIONAL_FEED_PRECISION)*amount)/PRECISION;
@@ -465,4 +470,4 @@ function getAccountInformation(address user) external view returns
     function getHealthFactor(address user) external view returns (uint256) {
         return _healthFactor(user);
     }
-}
+}}}
